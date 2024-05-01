@@ -178,6 +178,16 @@ func rs256_tokenHandler(w http.ResponseWriter, _ *http.Request) {
 		_, _ = fmt.Fprintf(w, "INTERNAL ERROR: %s", err)
 	}
 	_, _ = fmt.Fprint(w, signedString)
+
+	compact, err := jose.ParseSignedCompact(signedString, []jose.SignatureAlgorithm{jose.RS256})
+	if err != nil {
+		log.Fatalf("failed to parse signed compact: %s", err)
+	}
+
+	_, err = compact.Verify(&rsaPrivateKey.PublicKey)
+	if err != nil {
+		log.Fatalf("unable to verify signature: %s", err)
+	}
 }
 
 func ec_tokenHandler(w http.ResponseWriter, _ *http.Request) {
@@ -191,4 +201,14 @@ func ec_tokenHandler(w http.ResponseWriter, _ *http.Request) {
 		_, _ = fmt.Fprintf(w, "INTERNAL ERROR: %s", err)
 	}
 	_, _ = fmt.Fprint(w, signedString)
+
+	compact, err := jose.ParseSignedCompact(signedString, []jose.SignatureAlgorithm{jose.ES256})
+	if err != nil {
+		log.Fatalf("failed to parse signed compact: %s", err)
+	}
+
+	_, err = compact.Verify(&ellipticPrivateKey.PublicKey)
+	if err != nil {
+		log.Fatalf("unable to verify signature: %s", err)
+	}
 }
